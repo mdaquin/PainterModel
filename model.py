@@ -7,7 +7,13 @@ import torch
 class PainterDataset(Dataset):
     def __init__(self, filename, tokenizer, max_length=128, returnIDs=False):
         self.returnIDs = returnIDs
-        df = pd.read_csv(filename, index_col=0)
+        if type(filename) == str:
+            df = pd.read_csv(filename, index_col=0)
+        else: 
+            df = None
+            for fn in filename:
+                if df is None: df = pd.read_csv(fn, index_col=0)
+                else: df = pd.concat([df, pd.read_csv(fn, index_col=0)])
         self.IDs = df.index.tolist() if returnIDs else None
         self.texts = df['desc'].tolist()
         self.labels = df['inmuseum'].tolist()
@@ -20,8 +26,6 @@ class PainterDataset(Dataset):
     def __getitem__(self, idx):
         text = str(self.texts[idx])
         label = self.labels[idx]
-        
-        # Tokenize text
         encoding = self.tokenizer(
             text,
             truncation=True,
@@ -35,8 +39,7 @@ class PainterDataset(Dataset):
             'attention_mask': encoding['attention_mask'].flatten(),
             'label': torch.tensor(label, dtype=torch.long)
         }
-        if self.returnIDs: 
-            tr['ID'] = self.IDs[idx]
+        if self.returnIDs: tr['ID'] = self.IDs[idx]
         return tr
 
 class PainterModel(nn.Module):
