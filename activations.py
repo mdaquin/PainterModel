@@ -83,7 +83,8 @@ if __name__ == "__main__":
     tosave["acts"][acti.llayers[idx]] = []
     for ids, acts, label, preds in tqdm(acti, f"Extracting activations for {acti.llayers[idx]}"):
        tosave["ids"]+=ids
-       for layer in acts: tosave["acts"][layer]+=acts
+       for layer in acts:
+           tosave["acts"][layer]+=acts[layer]
     torch.save(tosave, f"activations/{acti.llayers[idx]}.pth")
        
         
