@@ -79,10 +79,11 @@ if __name__ == "__main__":
         print(i,"-",layer)
     idx = int(input("For which layer do you which to save activations? "))
     acti = PainterActivations(acti.llayers[idx], device=device)
-    tosave = {"ids": [], "acts": []}
+    tosave = {"ids": [], "acts": {}}
+    tosave["acts"][acti.llayers[idx]] = []
     for ids, acts, label, preds in tqdm(acti, f"Extracting activations for {acti.llayers[idx]}"):
        tosave["ids"]+=ids
-       tosave["acts"]+=acts
+       for layer in acts: tosave["acts"][layer]+=acts
     torch.save(tosave, f"activations/{acti.llayers[idx]}.pth")
        
         
