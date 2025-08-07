@@ -18,7 +18,7 @@ class PainterActivations:
         self.model = PainterModel(MODEL_NAME, n_classes=2, dropout=0.3)
         self.model = self.model.to(device)
         self.model.eval()
-        self.aggregation = "cls"
+        self.aggregation = aggregation
 
         self.llayers = []
         self.activation = {}
