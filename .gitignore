@@ -1,4 +1,7 @@
 *.pth
+*.pkl
+*.csv
+*.dot
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

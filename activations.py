@@ -4,6 +4,8 @@ from transformers import AutoTokenizer
 from tqdm import tqdm
 import torch
 
+# TODO : look into mean and max activation with mask
+
 class PainterActivations:
     def __init__(self, layer, max_length=128, batch_size=128, aggregation="cls", traintest = "both", device="cpu"):
         self.device = device
@@ -75,16 +77,14 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     acti = PainterActivations("bert.transformer", device=device)
-    for i,layer in enumerate(acti.llayers):
-        print(i,"-",layer)
+    for i,layer in enumerate(acti.llayers): print(i,"-",layer)
     idx = int(input("For which layer do you which to save activations? "))
     acti = PainterActivations(acti.llayers[idx], device=device)
     tosave = {"ids": [], "acts": {}}
     tosave["acts"][acti.llayers[idx]] = []
     for ids, acts, label, preds in tqdm(acti, f"Extracting activations for {acti.llayers[idx]}"):
        tosave["ids"]+=ids
-       for layer in acts:
-           tosave["acts"][layer]+=acts[layer]
+       for layer in acts: tosave["acts"][layer]+=acts[layer]
     torch.save(tosave, f"activations/{acti.llayers[idx]}.pth")
        
         
