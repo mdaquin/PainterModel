@@ -18,6 +18,7 @@ class PainterActivations:
         else: raise ValueError('traintest should be "train", "test", or "both"')
         self.loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         self.model = PainterModel(MODEL_NAME, n_classes=2, dropout=0.3)
+        self.model.load_state_dict(torch.load("best_model.pth"))
         self.model = self.model.to(device)
         self.model.eval()
         self.aggregation = aggregation
