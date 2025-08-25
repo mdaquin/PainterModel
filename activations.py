@@ -16,13 +16,14 @@ class PainterActivations:
         elif traintest == "train": dataset = PainterDataset("data/train.csv", tokenizer, max_length, returnIDs=True)
         elif traintest == "test": dataset = PainterDataset("data/test.csv", tokenizer, max_length, returnIDs=True)
         else: raise ValueError('traintest should be "train", "test", or "both"')
-        self.loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+        self.loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
         self.model = PainterModel(MODEL_NAME, n_classes=2, dropout=0.3)
         self.model.load_state_dict(torch.load("best_model.pth"))
         self.model = self.model.to(device)
         self.model.eval()
         self.aggregation = aggregation
-
+        self.iter = None
+        
         self.llayers = []
         self.activation = {}
         def get_activation(name):
@@ -45,15 +46,19 @@ class PainterActivations:
     
     def __iter__(self): 
         self.loader.__iter__()
+        self.iter = iter(self.loader)
         self.counter = 0
         return self
 
     def __len__(self): return len(self.loader)
 
     def __next__(self):
-        if self.counter is not None and self.counter >= len(self): raise StopIteration()
+        if self.counter is not None and self.counter >= len(self):
+            self.iter = None
+            raise StopIteration()
         self.counter += 1
-        batch = next(iter(self.loader))
+        if self.iter is None: self.iter = iter(self.loader)
+        batch = next(self.iter)
         input_ids = batch['input_ids'].to(self.device)
         attention_mask = batch['attention_mask'].to(self.device)
         labels = batch['label']
